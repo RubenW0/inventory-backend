@@ -12,11 +12,16 @@ class ProductRepository:
         except ObjectDoesNotExist:
             return None
 
-    def create(self, name, price, stock):
+    def create(self, dto):
         product = Product.objects.create(
-            name=name,
-            price=price,
-            stock=stock
+            name=dto.name,
+            type=dto.type,
+            stock_quantity=dto.stock_quantity,
+            min_stock=dto.min_stock,
+            advised_price=dto.advised_price,
+            total_value=dto.total_value,
+            location=dto.location,
+            status=dto.status
         )
         return product
 

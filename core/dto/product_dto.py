@@ -5,11 +5,23 @@ from dataclasses import dataclass
 class ProductDTO:
     id: int
     name: str
-    price: float
-    stock: int
+    type: str
+    stock_quantity: float
+    min_stock: int
+    advised_price: float
+    total_value: float
+    location: str
+    status: str
+
 
 @dataclass
 class ProductCreateDTO:
     name: str
-    price: float
-    stock: int
+    type: str
+    stock_quantity: float
+    min_stock: int
+    advised_price: float
+    total_value: float
+    location: str
+    status: str
+

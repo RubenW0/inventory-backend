@@ -5,10 +5,8 @@ from core.services.product_service import ProductService
 
 class ProductServiceTests(TestCase):
     def setUp(self):
-        # Maak een mock repository aan
         self.mock_repo = Mock()
 
-        # Injecteer de mock in de service
         self.service = ProductService(repo=self.mock_repo)
 
     def test_get_product_calls_repository(self):
