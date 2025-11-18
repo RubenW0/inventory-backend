@@ -51,24 +51,39 @@ def product_update(request, product_id):
         return HttpResponseNotAllowed(["PUT"])
     try:
         data = json.loads(request.body)
+
         product = service.update_product(
             product_id=product_id,
             name=data.get("name"),
-            price=data.get("price"),
-            stock=data.get("stock")
+            type=data.get("type"),
+            stock_quantity=data.get("stock_quantity") or 0,
+            min_stock=data.get("min_stock") or 0,
+            advised_price=data.get("advised_price") or 0,
+            total_value=data.get("total_value") or 0,
+            location=data.get("location"),
+            status=data.get("status")
         )
+
         if not product:
             return HttpResponseBadRequest("Product not found")
+
         return JsonResponse({
             "id": product.id,
             "name": product.name,
-            "price": float(product.price),
-            "stock": product.stock
+            "type": product.type,
+            "stock_quantity": float(product.stock_quantity),
+            "min_stock": product.min_stock,
+            "advised_price": float(product.advised_price),
+            "total_value": float(product.total_value),
+            "location": product.location,
+            "status": product.status
         })
+
     except (KeyError, json.JSONDecodeError):
         return HttpResponseBadRequest("Invalid data")
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e), "trace": traceback.format_exc()}, status=500)
+
 
 
 @csrf_exempt
