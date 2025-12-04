@@ -26,3 +26,31 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.type})"
+
+class Supplier(models.Model):
+    name = models.CharField(max_length=100, default="")
+    email = models.EmailField(max_length=150, default="")
+    phone = models.CharField(max_length=20, default="")
+    address = models.CharField(max_length=200, default="")
+
+    def __str__(self):
+        return self.name
+
+
+class Order(models.Model):
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name="orders")
+    #user
+    status = models.CharField(max_length=50, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)  # automatisch timestamp
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.status}"
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)   # linkt met jouw bestaande Product
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+
+    def __str__(self):
+        return f"{self.product.name} × {self.quantity}"
