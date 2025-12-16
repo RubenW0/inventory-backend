@@ -10,6 +10,8 @@ class ProductStatus(Enum):
     def choices(cls):
         return [(status.value, status.value.replace("_", " ").title()) for status in cls]
 
+
+
 class Product(models.Model):
     name = models.CharField(max_length=100, default="")  # default string, niet 0
     type = models.CharField(max_length=50, default="")   # default string
@@ -36,12 +38,24 @@ class Supplier(models.Model):
     def __str__(self):
         return self.name
 
+class OrderStatus(Enum):
+    PENDING = "pending"
+    ORDERED = "ordered"
+    RECEIVED = "received"
+    CANCELLED = "cancelled"
+
+    @classmethod
+    def choices(cls):
+        return [(s.value, s.value.replace("_", " ").title()) for s in cls]
 
 class Order(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name="orders")
-    #user
-    status = models.CharField(max_length=50, default="pending")
-    created_at = models.DateTimeField(auto_now_add=True)  # automatisch timestamp
+    status = models.CharField(
+        max_length=20,
+        choices=OrderStatus.choices(),
+        default=OrderStatus.PENDING.value
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Order #{self.id} - {self.status}"

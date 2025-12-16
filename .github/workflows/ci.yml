@@ -5,9 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # ------------------------
-  # 1. CI: TEST PYTHON CODE
-  # ------------------------
+#  CI: Test python code
   tests:
     runs-on: ubuntu-latest
 
@@ -45,11 +43,10 @@ jobs:
             -Dsonar.projectKey=RubenW0_inventory-backend
             -Dsonar.python.coverage.reportPaths=coverage.xml
 
-  # -----------------------------------
-  # 2. BUILD DOCKER IMAGE + PUSH
-  # -----------------------------------
+
+#  BUILD DOCKER IMAGE + PUSH
   docker:
-    needs: tests     # alleen starten als tests slagen
+    needs: tests
     runs-on: ubuntu-latest
 
     steps:
@@ -68,9 +65,7 @@ jobs:
       - name: Push Docker image
         run: docker push rubenw0/inventory-backend:latest
 
-  # -------------------------
-  # 3. CD: DEPLOY VIA SSH
-  # -------------------------
+  # CD: DEPLOY VIA SSH
 #  deploy:
 #    needs: docker
 #    runs-on: ubuntu-latest

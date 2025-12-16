@@ -5,7 +5,6 @@ from typing import List
 class OrderItemDTO:
     product_id: int
     quantity: int
-    price: float
 
 
 @dataclass

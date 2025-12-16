@@ -1,3 +1,5 @@
+from django.db import transaction
+from core.models import Order, OrderItem, Product, Supplier, OrderStatus
 from core.repositories.order_repository import OrderRepository
 
 class OrderService:
@@ -5,9 +7,51 @@ class OrderService:
     def __init__(self):
         self.repo = OrderRepository()
 
-    def create_order(self, order_dto):
+    @transaction.atomic
+    def create_order(self, dto):
+        supplier = Supplier.objects.get(id=dto.supplier_id)
 
-        return self.repo.create_order(order_dto)
+        order = Order.objects.create(
+            supplier=supplier,
+            status=OrderStatus.PENDING.value
+        )
+
+        for item in dto.items:
+            product = Product.objects.get(id=item.product_id)
+
+            if item.quantity <= 0:
+                raise ValueError("Quantity must be greater than 0")
+
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=item.quantity,
+            )
+
+        return order
+
+    @transaction.atomic
+    def receive_order(self, order_id):
+        order = Order.objects.get(id=order_id)
+
+        if order.status != OrderStatus.PENDING.value:
+            raise ValueError("Only pending orders can be received")
+
+        for item in order.items.all():
+            product = item.product
+            product.stock_quantity += item.quantity
+            product.save()
+
+        order.status = OrderStatus.RECEIVED.value
+        order.save()
+
+        return order
 
     def get_orders(self):
         return self.repo.get_all_orders()
+
+    def get_order(self, order_id):
+        return Order.objects.prefetch_related(
+            "items__product", "supplier"
+        ).get(id=order_id)
+
