@@ -52,6 +52,7 @@ def get_orders(request):
                 {
                     "product": item.product.name,
                     "quantity": item.quantity,
+                    "price": float(item.price),
                 }
                 for item in order.items.all()
             ]

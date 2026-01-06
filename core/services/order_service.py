@@ -26,19 +26,25 @@ class OrderService:
                 order=order,
                 product=product,
                 quantity=item.quantity,
+                price=product.advised_price,
             )
 
         return order
 
     @transaction.atomic
     def receive_order(self, order_id):
-        order = Order.objects.get(id=order_id)
+        order = (
+            Order.objects
+            .select_for_update()
+            .prefetch_related("items__product")
+            .get(id=order_id)
+        )
 
         if order.status != OrderStatus.PENDING.value:
             raise ValueError("Only pending orders can be received")
 
         for item in order.items.all():
-            product = item.product
+            product = Product.objects.select_for_update().get(id=item.product.id)
             product.stock_quantity += item.quantity
             product.save()
 
