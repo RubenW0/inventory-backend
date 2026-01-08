@@ -1,16 +1,21 @@
 import json
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from core.dto.order_dto import OrderDTO, OrderItemDTO
 from core.services.order_service import OrderService
 from core.models import Order
 
-@csrf_exempt
-def create_order(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=405)
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import AllowAny
+from core.permissions import IsStaffOrAdmin
 
-    data = json.loads(request.body)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsStaffOrAdmin])
+def create_order(request):
+    data = request.data
 
     if "supplier_id" not in data or "items" not in data:
         return JsonResponse({"error": "supplier_id and items required"}, status=400)
@@ -34,11 +39,10 @@ def create_order(request):
 
 
 
-@csrf_exempt
-def get_orders(request):
-    if request.method != "GET":
-        return JsonResponse({"error": "GET required"}, status=405)
 
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_orders(request):
     orders = OrderService().get_orders()
 
     response = []
@@ -61,11 +65,11 @@ def get_orders(request):
     return JsonResponse(response, safe=False)
 
 
-@csrf_exempt
-def receive_order(request, order_id):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=405)
 
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsStaffOrAdmin])
+def receive_order(request, order_id):
     service = OrderService()
     try:
         order = service.receive_order(order_id)
@@ -73,17 +77,14 @@ def receive_order(request, order_id):
         return JsonResponse({"error": "Order not found"}, status=404)
     except ValueError as e:
         return JsonResponse({"error": str(e)}, status=400)
-    except Exception as e:
-        return JsonResponse({"error": "Server error: " + str(e)}, status=500)
 
     return JsonResponse({"message": "Order received", "order_id": order.id})
 
 
-@csrf_exempt
-def get_order(request, order_id):
-    if request.method != "GET":
-        return JsonResponse({"error": "GET required"}, status=405)
 
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_order(request, order_id):
     order = OrderService().get_order(order_id)
 
     return JsonResponse({
@@ -99,3 +100,4 @@ def get_order(request, order_id):
             for item in order.items.all()
         ]
     })
+

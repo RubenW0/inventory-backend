@@ -4,3 +4,6 @@ djangorestframework
 pytest
 pytest-cov
 django-cors-headers
+djangorestframework-simplejwt
+gunicorn
+

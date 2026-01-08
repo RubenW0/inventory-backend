@@ -1,17 +1,22 @@
 import json
 import traceback
-from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+
 from core.services.product_service import ProductService
 from core.repositories.product_repository import ProductRepository
 from core.dto.product_dto import ProductCreateDTO
 
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import AllowAny
+from core.permissions import IsStaffOrAdmin
+
 service = ProductService(ProductRepository())
 
-@csrf_exempt
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
 def product_list(request):
-    if request.method != "GET":
-        return HttpResponseNotAllowed(["GET"])
     try:
         products = service.list_products()
         data = [p.__dict__ for p in products]
@@ -20,12 +25,13 @@ def product_list(request):
         return JsonResponse({"error": str(e), "trace": traceback.format_exc()}, status=500)
 
 
-@csrf_exempt
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsStaffOrAdmin])
 def product_create(request):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
     try:
-        data = json.loads(request.body)
+        data = request.data
         dto = ProductCreateDTO(
             name=data["name"],
             type=data["type"],
@@ -45,12 +51,13 @@ def product_create(request):
 
 
 
-@csrf_exempt
+
+@api_view(["PUT"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsStaffOrAdmin])
 def product_update(request, product_id):
-    if request.method != "PUT":
-        return HttpResponseNotAllowed(["PUT"])
     try:
-        data = json.loads(request.body)
+        data = request.data
 
         product = service.update_product(
             product_id=product_id,
@@ -86,10 +93,11 @@ def product_update(request, product_id):
 
 
 
-@csrf_exempt
+
+@api_view(["DELETE"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsStaffOrAdmin])
 def product_delete(request, product_id):
-    if request.method != "DELETE":
-        return HttpResponseNotAllowed(["DELETE"])
     try:
         success = service.delete_product(product_id)
         if success:
@@ -97,3 +105,4 @@ def product_delete(request, product_id):
         return HttpResponseBadRequest("Product not found")
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
