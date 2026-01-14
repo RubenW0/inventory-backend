@@ -27,9 +27,13 @@ jobs:
         run: python -m compileall .
 
       - name: Run unit tests
+        env:
+          DJANGO_SETTINGS_MODULE: app.settings
         run: python -m unittest discover -s core/tests -p "test_*.py" -v
 
       - name: Run tests with coverage
+        env:
+          DJANGO_SETTINGS_MODULE: app.settings
         run: pytest --cov=. --cov-report=xml
 
       - name: SonarQube Scan
