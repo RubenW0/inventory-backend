@@ -27,10 +27,16 @@ jobs:
         run: python -m compileall .
 
       - name: Run Django tests
-        run: python manage.py test --settings=app.settings_test
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        run: python manage.py test
+
 
       - name: Run tests with coverage
-        run: coverage run manage.py test --settings=app.settings_test && coverage xml
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        run: coverage run manage.py test && coverage xml
+
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v2
