@@ -14,10 +14,10 @@ class OrderService:
         supplier = self.supplier_repo.get(dto.supplier_id)
 
         order = self.order_model(
-            id=None,
             supplier=supplier,
             status=OrderStatus.PENDING.value
         )
+        order.save()
 
         for item in dto.items:
             product = self.product_repo.get(item.product_id)
@@ -25,16 +25,23 @@ class OrderService:
             if item.quantity <= 0:
                 raise ValueError("Quantity must be greater than 0")
 
-            order_item = self.order_item_model(
-                order=order,
-                product=product,
-                quantity=item.quantity,
-                price=product.advised_price
-            )
+            if hasattr(self.order_item_model, "objects"):
+                self.order_item_model.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=item.quantity,
+                    price=product.advised_price
+                )
+            else:
+                order.items.append(
+                    self.order_item_model(
+                        order=order,
+                        product=product,
+                        quantity=item.quantity,
+                        price=product.advised_price
+                    )
+                )
 
-            order.items.append(order_item)
-
-        self.repo.save(order)
         return order
 
     def receive_order(self, order_id):

@@ -20,12 +20,20 @@ class FakeOrderItem:
         self.quantity = quantity
         self.price = price
 
+    def save(self):
+        pass
+
+
 class FakeOrder:
-    def __init__(self, id, supplier, status=OrderStatus.PENDING.value):
+    def __init__(self, supplier, status=OrderStatus.PENDING.value, id=None):
         self.id = id
         self.supplier = supplier
         self.status = status
         self.items = []
+
+    def save(self):
+        pass
+
 
 class FakeProductRepo:
     def __init__(self, products):

@@ -1,15 +1,30 @@
+# core/views/order_view.py
+
 import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from core.dto.order_dto import OrderDTO, OrderItemDTO
 from core.services.order_service import OrderService
-from core.models import Order
+from core.repositories.order_repository import OrderRepository
+from core.repositories.product_repository import ProductRepository
+from core.repositories.supplier_repository import SupplierRepository
+from core.models import Order, OrderItem
 
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import AllowAny
 from core.permissions import IsStaffOrAdmin
+
+
+def get_order_service():
+    return OrderService(
+        repo=OrderRepository(),
+        product_repo=ProductRepository(),
+        supplier_repo=SupplierRepository(),
+        order_model=Order,
+        order_item_model=OrderItem
+    )
 
 
 @require_POST
@@ -36,7 +51,9 @@ def create_order(request):
         items=items
     )
 
-    order = OrderService().create_order(dto)
+    service = get_order_service()
+    order = service.create_order(dto)
+
     return JsonResponse({"message": "Order created", "order_id": order.id}, status=201)
 
 
@@ -44,7 +61,8 @@ def create_order(request):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_orders(request):
-    orders = OrderService().get_orders()
+    service = get_order_service()
+    orders = service.get_orders()
 
     response = []
     for order in orders:
@@ -71,7 +89,8 @@ def get_orders(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsStaffOrAdmin])
 def receive_order(request, order_id):
-    service = OrderService()
+    service = get_order_service()
+
     try:
         order = service.receive_order(order_id)
     except Order.DoesNotExist:
@@ -81,12 +100,12 @@ def receive_order(request, order_id):
 
     return JsonResponse({"message": "Order received", "order_id": order.id})
 
-
 @require_GET
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_order(request, order_id):
-    order = OrderService().get_order(order_id)
+    service = get_order_service()
+    order = service.get_order(order_id)
 
     return JsonResponse({
         "id": order.id,

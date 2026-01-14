@@ -33,19 +33,23 @@ def product_list(request):
 @permission_classes([IsStaffOrAdmin])
 def product_create(request):
     try:
+        print("REQUEST DATA:", request.data)
+
         data = request.data
         dto = ProductCreateDTO(
             name=data["name"],
             type=data["type"],
-            stock_quantity=data["stock_quantity"],
-            min_stock=data["min_stock"],
-            advised_price=data["advised_price"],
+            stock_quantity=float(data["stock_quantity"]),
+            min_stock=int(data["min_stock"]),
+            advised_price=float(data["advised_price"]),
             location=data["location"]
         )
         product = service.create_product(dto)
         return JsonResponse(product.__dict__)
-    except (KeyError, json.JSONDecodeError):
+
+    except (KeyError, ValueError, json.JSONDecodeError):
         return HttpResponseBadRequest("Invalid data")
+
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
