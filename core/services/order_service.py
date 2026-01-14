@@ -1,63 +1,62 @@
-from django.db import transaction
-from core.models import Order, OrderItem, Product, Supplier, OrderStatus
-from core.repositories.order_repository import OrderRepository
+# core/services/order_service.py
+from core.models import OrderStatus
 
 class OrderService:
 
-    def __init__(self):
-        self.repo = OrderRepository()
+    def __init__(self, repo, product_repo, supplier_repo, order_model, order_item_model):
+        self.repo = repo
+        self.product_repo = product_repo
+        self.supplier_repo = supplier_repo
+        self.order_model = order_model
+        self.order_item_model = order_item_model
 
-    @transaction.atomic
     def create_order(self, dto):
-        supplier = Supplier.objects.get(id=dto.supplier_id)
+        supplier = self.supplier_repo.get(dto.supplier_id)
 
-        order = Order.objects.create(
+        order = self.order_model(
+            id=None,
             supplier=supplier,
             status=OrderStatus.PENDING.value
         )
 
         for item in dto.items:
-            product = Product.objects.get(id=item.product_id)
+            product = self.product_repo.get(item.product_id)
 
             if item.quantity <= 0:
                 raise ValueError("Quantity must be greater than 0")
 
-            OrderItem.objects.create(
+            order_item = self.order_item_model(
                 order=order,
                 product=product,
                 quantity=item.quantity,
-                price=product.advised_price,
+                price=product.advised_price
             )
 
+            order.items.append(order_item)
+
+        self.repo.save(order)
         return order
 
-    @transaction.atomic
     def receive_order(self, order_id):
-        order = (
-            Order.objects
-            .select_for_update()
-            .prefetch_related("items__product")
-            .get(id=order_id)
-        )
+        order = self.repo.get_order_by_id(order_id)
+        if not order:
+            raise ValueError("Order not found")
 
         if order.status != OrderStatus.PENDING.value:
             raise ValueError("Only pending orders can be received")
 
-        for item in order.items.all():
-            product = Product.objects.select_for_update().get(id=item.product.id)
-            product.stock_quantity += item.quantity
-            product.save()
+        for item in order.items:
+            item.product.stock_quantity += item.quantity
 
         order.status = OrderStatus.RECEIVED.value
-        order.save()
-
+        self.repo.save(order)
         return order
 
     def get_orders(self):
         return self.repo.get_all_orders()
 
     def get_order(self, order_id):
-        return Order.objects.prefetch_related(
-            "items__product", "supplier"
-        ).get(id=order_id)
-
+        order = self.repo.get_order_by_id(order_id)
+        if not order:
+            raise ValueError("Order not found")
+        return order

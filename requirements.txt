@@ -6,4 +6,5 @@ pytest-cov
 django-cors-headers
 djangorestframework-simplejwt
 gunicorn
+django-environ
 

@@ -1,6 +1,7 @@
 import json
 import traceback
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from core.services.product_service import ProductService
 from core.repositories.product_repository import ProductRepository
@@ -14,6 +15,7 @@ from core.permissions import IsStaffOrAdmin
 service = ProductService(ProductRepository())
 
 
+@require_GET
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def product_list(request):
@@ -25,7 +27,7 @@ def product_list(request):
         return JsonResponse({"error": str(e), "trace": traceback.format_exc()}, status=500)
 
 
-
+@require_POST
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsStaffOrAdmin])
@@ -48,8 +50,7 @@ def product_create(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-
-
+@require_http_methods(["PUT"])
 @api_view(["PUT"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsStaffOrAdmin])
@@ -88,8 +89,7 @@ def product_update(request, product_id):
         return JsonResponse({"error": str(e), "trace": traceback.format_exc()}, status=500)
 
 
-
-
+@require_http_methods(["DELETE"])
 @api_view(["DELETE"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsStaffOrAdmin])
@@ -101,4 +101,3 @@ def product_delete(request, product_id):
         return HttpResponseBadRequest("Product not found")
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-

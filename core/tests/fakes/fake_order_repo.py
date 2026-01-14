@@ -14,7 +14,8 @@ class FakeSupplier:
         self.name = name
 
 class FakeOrderItem:
-    def __init__(self, product, quantity, price):
+    def __init__(self, order, product, quantity, price):
+        self.order = order
         self.product = product
         self.quantity = quantity
         self.price = price
@@ -26,20 +27,35 @@ class FakeOrder:
         self.status = status
         self.items = []
 
+class FakeProductRepo:
+    def __init__(self, products):
+        self.products = {p.id: p for p in products}
+
+    def get(self, product_id):
+        return self.products[product_id]
+
+class FakeSupplierRepo:
+    def __init__(self, suppliers):
+        self.suppliers = {s.id: s for s in suppliers}
+
+    def get(self, supplier_id):
+        return self.suppliers[supplier_id]
+
 class FakeOrderRepository:
     def __init__(self):
         self.orders = []
         self._next_id = 1
 
-    def get_all_orders(self):
-        return self.orders
-
     def save(self, order):
-        if order not in self.orders:
+        if order.id is None:
             order.id = self._next_id
             self._next_id += 1
+        if order not in self.orders:
             self.orders.append(order)
         return order
+
+    def get_all_orders(self):
+        return self.orders
 
     def get_order_by_id(self, order_id):
         return next((o for o in self.orders if o.id == order_id), None)

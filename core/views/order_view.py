@@ -1,5 +1,7 @@
 import json
 from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
+
 from core.dto.order_dto import OrderDTO, OrderItemDTO
 from core.services.order_service import OrderService
 from core.models import Order
@@ -10,7 +12,7 @@ from rest_framework.permissions import AllowAny
 from core.permissions import IsStaffOrAdmin
 
 
-
+@require_POST
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsStaffOrAdmin])
@@ -38,8 +40,7 @@ def create_order(request):
     return JsonResponse({"message": "Order created", "order_id": order.id}, status=201)
 
 
-
-
+@require_GET
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_orders(request):
@@ -65,7 +66,7 @@ def get_orders(request):
     return JsonResponse(response, safe=False)
 
 
-
+@require_POST
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsStaffOrAdmin])
@@ -81,7 +82,7 @@ def receive_order(request, order_id):
     return JsonResponse({"message": "Order received", "order_id": order.id})
 
 
-
+@require_GET
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_order(request, order_id):
@@ -100,4 +101,3 @@ def get_order(request, order_id):
             for item in order.items.all()
         ]
     })
-

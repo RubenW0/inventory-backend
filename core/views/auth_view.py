@@ -3,7 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from core.serializers import RegisterSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.http import require_POST, require_GET
+from django.utils.decorators import method_decorator
 
+
+@method_decorator(require_POST, name="post")
 class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -12,6 +16,8 @@ class RegisterView(APIView):
             return Response({"message": "User registered", "id": user.id})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+@method_decorator(require_GET, name="get")
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -23,4 +29,3 @@ class MeView(APIView):
             "email": user.email,
             "role": user.role
         })
-
