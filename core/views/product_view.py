@@ -38,9 +38,7 @@ def product_create(request):
             stock_quantity=data["stock_quantity"],
             min_stock=data["min_stock"],
             advised_price=data["advised_price"],
-            total_value=data["total_value"],
-            location=data["location"],
-            status=data["status"]
+            location=data["location"]
         )
         product = service.create_product(dto)
         return JsonResponse(product.__dict__)
@@ -63,12 +61,10 @@ def product_update(request, product_id):
             product_id=product_id,
             name=data.get("name"),
             type=data.get("type"),
-            stock_quantity=data.get("stock_quantity") or 0,
-            min_stock=data.get("min_stock") or 0,
-            advised_price=data.get("advised_price") or 0,
-            total_value=data.get("total_value") or 0,
-            location=data.get("location"),
-            status=data.get("status")
+            stock_quantity=data.get("stock_quantity"),
+            min_stock=data.get("min_stock"),
+            advised_price=data.get("advised_price"),
+            location=data.get("location")
         )
 
         if not product:
