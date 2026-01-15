@@ -1,20 +1,22 @@
 # core/views/order_view.py
 
-import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from core.dto.order_dto import OrderDTO, OrderItemDTO
-from core.services.order_service import OrderService
+from core.models import Order, OrderItem
+from core.permissions import IsStaffOrAdmin
 from core.repositories.order_repository import OrderRepository
 from core.repositories.product_repository import ProductRepository
 from core.repositories.supplier_repository import SupplierRepository
-from core.models import Order, OrderItem
-
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import AllowAny
-from core.permissions import IsStaffOrAdmin
+from core.services.order_service import OrderService
 
 
 def get_order_service():
@@ -23,7 +25,7 @@ def get_order_service():
         product_repo=ProductRepository(),
         supplier_repo=SupplierRepository(),
         order_model=Order,
-        order_item_model=OrderItem
+        order_item_model=OrderItem,
     )
 
 
@@ -45,11 +47,7 @@ def create_order(request):
         for i in data["items"]
     ]
 
-    dto = OrderDTO(
-        supplier_id=data["supplier_id"],
-        status="pending",
-        items=items
-    )
+    dto = OrderDTO(supplier_id=data["supplier_id"], status="pending", items=items)
 
     service = get_order_service()
     order = service.create_order(dto)
@@ -66,20 +64,22 @@ def get_orders(request):
 
     response = []
     for order in orders:
-        response.append({
-            "id": order.id,
-            "supplier": order.supplier.name,
-            "status": order.status,
-            "created_at": str(order.created_at),
-            "items": [
-                {
-                    "product": item.product.name,
-                    "quantity": item.quantity,
-                    "price": float(item.price),
-                }
-                for item in order.items.all()
-            ]
-        })
+        response.append(
+            {
+                "id": order.id,
+                "supplier": order.supplier.name,
+                "status": order.status,
+                "created_at": str(order.created_at),
+                "items": [
+                    {
+                        "product": item.product.name,
+                        "quantity": item.quantity,
+                        "price": float(item.price),
+                    }
+                    for item in order.items.all()
+                ],
+            }
+        )
 
     return JsonResponse(response, safe=False)
 
@@ -100,6 +100,7 @@ def receive_order(request, order_id):
 
     return JsonResponse({"message": "Order received", "order_id": order.id})
 
+
 @require_GET
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -107,16 +108,18 @@ def get_order(request, order_id):
     service = get_order_service()
     order = service.get_order(order_id)
 
-    return JsonResponse({
-        "id": order.id,
-        "supplier": order.supplier.name,
-        "status": order.status,
-        "created_at": str(order.created_at),
-        "items": [
-            {
-                "product": item.product.name,
-                "quantity": item.quantity,
-            }
-            for item in order.items.all()
-        ]
-    })
+    return JsonResponse(
+        {
+            "id": order.id,
+            "supplier": order.supplier.name,
+            "status": order.status,
+            "created_at": str(order.created_at),
+            "items": [
+                {
+                    "product": item.product.name,
+                    "quantity": item.quantity,
+                }
+                for item in order.items.all()
+            ],
+        }
+    )

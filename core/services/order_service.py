@@ -1,9 +1,11 @@
 # core/services/order_service.py
 from core.models import OrderStatus
 
-class OrderService:
 
-    def __init__(self, repo, product_repo, supplier_repo, order_model, order_item_model):
+class OrderService:
+    def __init__(
+        self, repo, product_repo, supplier_repo, order_model, order_item_model
+    ):
         self.repo = repo
         self.product_repo = product_repo
         self.supplier_repo = supplier_repo
@@ -13,10 +15,7 @@ class OrderService:
     def create_order(self, dto):
         supplier = self.supplier_repo.get(dto.supplier_id)
 
-        order = self.order_model(
-            supplier=supplier,
-            status=OrderStatus.PENDING.value
-        )
+        order = self.order_model(supplier=supplier, status=OrderStatus.PENDING.value)
         order.save()
 
         for item in dto.items:
@@ -30,7 +29,7 @@ class OrderService:
                     order=order,
                     product=product,
                     quantity=item.quantity,
-                    price=product.advised_price
+                    price=product.advised_price,
                 )
             else:
                 order.items.append(
@@ -38,7 +37,7 @@ class OrderService:
                         order=order,
                         product=product,
                         quantity=item.quantity,
-                        price=product.advised_price
+                        price=product.advised_price,
                     )
                 )
 

@@ -1,6 +1,7 @@
 # core/repositories/product_repository.py
-from core.models import Product
 from django.core.exceptions import ObjectDoesNotExist
+
+from core.models import Product
 
 
 class ProductRepository:
@@ -28,7 +29,7 @@ class ProductRepository:
             advised_price=dto.advised_price,
             total_value=total_value,
             location=dto.location,
-            status=status
+            status=status,
         )
 
     def save(self, product):

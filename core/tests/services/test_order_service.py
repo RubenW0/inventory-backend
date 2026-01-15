@@ -1,20 +1,28 @@
 # core/tests/test_order_service.py
 import unittest
+
+from core.models import OrderStatus
 from core.services.order_service import OrderService
 from core.tests.fakes.fake_order_repo import (
-    FakeProduct, FakeSupplier, FakeOrder, FakeOrderItem, FakeOrderRepository
+    FakeOrder,
+    FakeOrderItem,
+    FakeOrderRepository,
+    FakeProduct,
+    FakeSupplier,
 )
-from core.models import OrderStatus
+
 
 class FakeDTOItem:
     def __init__(self, product_id, quantity):
         self.product_id = product_id
         self.quantity = quantity
 
+
 class FakeOrderDTO:
     def __init__(self, supplier_id, items):
         self.supplier_id = supplier_id
         self.items = items
+
 
 class TestOrderService(unittest.TestCase):
     def setUp(self):
@@ -29,14 +37,11 @@ class TestOrderService(unittest.TestCase):
             product_repo={1: self.product1, 2: self.product2},
             supplier_repo={1: self.supplier},
             order_model=FakeOrder,
-            order_item_model=FakeOrderItem
+            order_item_model=FakeOrderItem,
         )
 
     def test_create_order_success(self):
-        dto = FakeOrderDTO(
-            supplier_id=1,
-            items=[FakeDTOItem(1, 2), FakeDTOItem(2, 5)]
-        )
+        dto = FakeOrderDTO(supplier_id=1, items=[FakeDTOItem(1, 2), FakeDTOItem(2, 5)])
 
         order = self.service.create_order(dto)
 
@@ -62,7 +67,9 @@ class TestOrderService(unittest.TestCase):
         self.assertEqual(self.product2.stock_quantity, 2)
 
     def test_receive_order_raises_error_if_not_pending(self):
-        order = FakeOrder(id=1, supplier=self.supplier, status=OrderStatus.RECEIVED.value)
+        order = FakeOrder(
+            id=1, supplier=self.supplier, status=OrderStatus.RECEIVED.value
+        )
         self.fake_repo.save(order)
 
         with self.assertRaises(ValueError):

@@ -1,9 +1,9 @@
 from django.http import JsonResponse
-from core.models import Supplier
-
+from django.views.decorators.http import require_GET
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from django.views.decorators.http import require_GET
+
+from core.models import Supplier
 
 
 @require_GET

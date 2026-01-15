@@ -1,16 +1,20 @@
 import json
 import traceback
-from django.http import JsonResponse, HttpResponseBadRequest
-from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from core.services.product_service import ProductService
-from core.repositories.product_repository import ProductRepository
-from core.dto.product_dto import ProductCreateDTO
-
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.http import HttpResponseBadRequest, JsonResponse
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from core.dto.product_dto import ProductCreateDTO
 from core.permissions import IsStaffOrAdmin
+from core.repositories.product_repository import ProductRepository
+from core.services.product_service import ProductService
 
 service = ProductService(ProductRepository())
 
@@ -24,7 +28,9 @@ def product_list(request):
         data = [p.__dict__ for p in products]
         return JsonResponse(data, safe=False)
     except Exception as e:
-        return JsonResponse({"error": str(e), "trace": traceback.format_exc()}, status=500)
+        return JsonResponse(
+            {"error": str(e), "trace": traceback.format_exc()}, status=500
+        )
 
 
 @require_POST
@@ -42,7 +48,7 @@ def product_create(request):
             stock_quantity=float(data["stock_quantity"]),
             min_stock=int(data["min_stock"]),
             advised_price=float(data["advised_price"]),
-            location=data["location"]
+            location=data["location"],
         )
         product = service.create_product(dto)
         return JsonResponse(product.__dict__)
@@ -69,28 +75,32 @@ def product_update(request, product_id):
             stock_quantity=data.get("stock_quantity"),
             min_stock=data.get("min_stock"),
             advised_price=data.get("advised_price"),
-            location=data.get("location")
+            location=data.get("location"),
         )
 
         if not product:
             return HttpResponseBadRequest("Product not found")
 
-        return JsonResponse({
-            "id": product.id,
-            "name": product.name,
-            "type": product.type,
-            "stock_quantity": float(product.stock_quantity),
-            "min_stock": product.min_stock,
-            "advised_price": float(product.advised_price),
-            "total_value": float(product.total_value),
-            "location": product.location,
-            "status": product.status
-        })
+        return JsonResponse(
+            {
+                "id": product.id,
+                "name": product.name,
+                "type": product.type,
+                "stock_quantity": float(product.stock_quantity),
+                "min_stock": product.min_stock,
+                "advised_price": float(product.advised_price),
+                "total_value": float(product.total_value),
+                "location": product.location,
+                "status": product.status,
+            }
+        )
 
     except (KeyError, json.JSONDecodeError):
         return HttpResponseBadRequest("Invalid data")
     except Exception as e:
-        return JsonResponse({"error": str(e), "trace": traceback.format_exc()}, status=500)
+        return JsonResponse(
+            {"error": str(e), "trace": traceback.format_exc()}, status=500
+        )
 
 
 @require_http_methods(["DELETE"])

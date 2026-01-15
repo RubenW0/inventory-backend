@@ -1,10 +1,11 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from core.serializers import RegisterSerializer
-from rest_framework.permissions import IsAuthenticated
-from django.views.decorators.http import require_POST, require_GET
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_GET, require_POST
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from core.serializers import RegisterSerializer
 
 
 @method_decorator(require_POST, name="post")
@@ -23,9 +24,11 @@ class MeView(APIView):
 
     def get(self, request):
         user = request.user
-        return Response({
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "role": user.role
-        })
+        return Response(
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "role": user.role,
+            }
+        )

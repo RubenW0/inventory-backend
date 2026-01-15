@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class ProductCreateDTO:
     name: str
@@ -8,6 +9,7 @@ class ProductCreateDTO:
     min_stock: int
     advised_price: float
     location: str
+
 
 @dataclass
 class ProductDTO:

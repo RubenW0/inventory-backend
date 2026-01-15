@@ -1,4 +1,4 @@
-from core.dto.product_dto import ProductDTO, ProductCreateDTO
+from core.dto.product_dto import ProductCreateDTO, ProductDTO
 from core.models import ProductStatus
 
 
@@ -23,7 +23,7 @@ class ProductService:
             advised_price=float(product.advised_price),
             total_value=float(product.total_value),
             location=product.location,
-            status=product.status
+            status=product.status,
         )
 
     def list_products(self):
@@ -37,16 +37,9 @@ class ProductService:
 
     def create_product(self, dto: ProductCreateDTO):
         total_value = dto.stock_quantity * dto.advised_price
-        status = self._determine_product_status(
-            dto.stock_quantity,
-            dto.min_stock
-        )
+        status = self._determine_product_status(dto.stock_quantity, dto.min_stock)
 
-        product = self.repo.create(
-            dto,
-            total_value=total_value,
-            status=status
-        )
+        product = self.repo.create(dto, total_value=total_value, status=status)
 
         return self._to_dto(product)
 
@@ -61,8 +54,7 @@ class ProductService:
 
         product.total_value = product.stock_quantity * product.advised_price
         product.status = self._determine_product_status(
-            product.stock_quantity,
-            product.min_stock
+            product.stock_quantity, product.min_stock
         )
 
         product = self.repo.save(product)

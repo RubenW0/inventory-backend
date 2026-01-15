@@ -1,30 +1,28 @@
 from unittest import TestCase
 
-from core.services.product_service import ProductService
 from core.dto.product_dto import ProductCreateDTO
-from core.tests.fakes.fake_product_repo import (
-    FakeProduct,
-    FakeProductRepository
-)
 from core.models import ProductStatus
+from core.services.product_service import ProductService
+from core.tests.fakes.fake_product_repo import FakeProduct, FakeProductRepository
 
 
 class ProductServiceTests(TestCase):
-
     def setUp(self):
-        self.repo = FakeProductRepository(products=[
-            FakeProduct(
-                id=1,
-                name="Laptop",
-                type="Electronics",
-                stock_quantity=10,
-                min_stock=2,
-                advised_price=1000,
-                total_value=10000,
-                location="A1",
-                status=ProductStatus.IN_STOCK.value
-            )
-        ])
+        self.repo = FakeProductRepository(
+            products=[
+                FakeProduct(
+                    id=1,
+                    name="Laptop",
+                    type="Electronics",
+                    stock_quantity=10,
+                    min_stock=2,
+                    advised_price=1000,
+                    total_value=10000,
+                    location="A1",
+                    status=ProductStatus.IN_STOCK.value,
+                )
+            ]
+        )
         self.service = ProductService(repo=self.repo)
 
     def test_list_products_returns_dtos(self):
@@ -51,7 +49,7 @@ class ProductServiceTests(TestCase):
             stock_quantity=5,
             min_stock=10,
             advised_price=25,
-            location="B2"
+            location="B2",
         )
 
         product = self.service.create_product(dto)
@@ -62,10 +60,7 @@ class ProductServiceTests(TestCase):
         self.assertEqual(len(self.repo.products), 2)
 
     def test_update_product_recalculates_fields(self):
-        updated = self.service.update_product(
-            1,
-            stock_quantity=0
-        )
+        updated = self.service.update_product(1, stock_quantity=0)
 
         self.assertEqual(updated.stock_quantity, 0)
         self.assertEqual(updated.status, ProductStatus.OUT_OF_STOCK.value)

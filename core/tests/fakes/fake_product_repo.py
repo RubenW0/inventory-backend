@@ -1,5 +1,6 @@
 # core/tests/fakes/fake_product_repo.py
 
+
 class FakeProduct:
     def __init__(
         self,
@@ -11,7 +12,7 @@ class FakeProduct:
         advised_price,
         total_value,
         location,
-        status
+        status,
     ):
         self.id = id
         self.name = name
@@ -45,7 +46,7 @@ class FakeProductRepository:
             advised_price=dto.advised_price,
             total_value=total_value,
             location=dto.location,
-            status=status
+            status=status,
         )
         self.products.append(product)
         self._next_id += 1

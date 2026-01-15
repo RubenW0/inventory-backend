@@ -2,8 +2,8 @@
 
 from core.models import Supplier
 
-class SupplierRepository:
 
+class SupplierRepository:
     def get(self, supplier_id):
         return Supplier.objects.get(id=supplier_id)
 
