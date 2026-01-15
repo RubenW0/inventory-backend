@@ -8,4 +8,6 @@ djangorestframework-simplejwt
 gunicorn
 django-environ
 python-dotenv
+dj-database-url
+
 
