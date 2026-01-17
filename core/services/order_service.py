@@ -51,9 +51,13 @@ class OrderService:
         if order.status != OrderStatus.PENDING.value:
             raise ValueError("Only pending orders can be received")
 
-        for item in order.items.all():
+        items = order.items.all() if hasattr(order.items, "all") else order.items
+
+        for item in items:
             item.product.stock_quantity += item.quantity
-            item.product.save()
+
+            if hasattr(item.product, "save"):
+                item.product.save()
 
         order.status = OrderStatus.RECEIVED.value
         self.repo.save(order)
