@@ -70,23 +70,3 @@ jobs:
 
       - name: Push Docker image
         run: docker push rubenw0/inventory-backend:latest
-
-  # CD: DEPLOY VIA SSH
-#  deploy:
-#    needs: docker
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Install SSH key
-#        uses: webfactory/ssh-agent@v0.7.0
-#        with:
-#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-#
-#      - name: Deploy to server
-#        run: |
-#          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-#            cd /home/${{ secrets.SERVER_USER }}/backend &&
-#            docker compose pull &&
-#            docker compose down &&
-#            docker compose up -d
-#          "
