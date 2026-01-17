@@ -10,6 +10,7 @@ from core.views.product_view import (
     product_update,
 )
 from core.views.supplier_view import supplier_list
+from core.views.userlist_view import UserListView, UpdateUserRoleView
 
 urlpatterns = [
     path("products/", product_list, name="product_list"),
@@ -25,4 +26,9 @@ urlpatterns = [
     path("auth/login/", TokenObtainPairView.as_view()),
     path("auth/refresh/", TokenRefreshView.as_view()),
     path("auth/me/", MeView.as_view()),
+
+    path("users/", UserListView.as_view(), name="user_list"),
+    path("users/<int:user_id>/update-role/", UpdateUserRoleView.as_view(), name="update_user_role"),
 ]
+
+
